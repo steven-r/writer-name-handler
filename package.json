@@ -3,7 +3,7 @@
 	"description": "Handle and process names in markdown documents.",
 	"author": "Stephen Reindl",
 	"license": "MIT",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/steven-r/writer-name-handler.git"
