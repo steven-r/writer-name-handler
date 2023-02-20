@@ -1,0 +1,9 @@
+name:
+  aka:
+    - bar
+  description: Some concept.
+notused:
+  aka:
+    - learning_rate
+    - lr
+  description: How big a step we take in each learning step

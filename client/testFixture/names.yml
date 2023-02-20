@@ -1,0 +1,15 @@
+name:
+  aka:
+    - bar
+  description: Some concept.
+  
+notused:
+  aka:
+    - learning_rate
+    - test
+  description: How big a step we take in each learning step
+
+here:
+  description: |
+    Some more text that is used to display information being
+    spread over several lines.

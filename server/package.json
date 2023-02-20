@@ -1,22 +1,22 @@
 {
-	"name": "jargon-lsp-server",
-	"description": "Jargon LSP server",
+	"name": "writer-name-lsp-server",
+	"description": "Name LSP server",
 	"version": "1.0.1",
-	"author": "Microsoft Corporation",
+	"author": "Stephen Reindl",
 	"license": "MIT",
 	"engines": {
 		"node": "*"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/txus/jargon"
+		"url": "https://github.com/steven-r/writer-name-handler.git"
 	},
 	"dependencies": {
 		"file-uri-to-path": "^2.0.0",
-		"vscode-languageserver": "^7.0.0",
-		"vscode-languageserver-textdocument": "^1.0.1",
-		"vscode-uri": "^3.0.2",
-		"yaml": "^1.10.2"
+		"vscode-languageserver": "^8.1.0",
+		"vscode-languageserver-textdocument": "^1.0.8",
+		"vscode-uri": "^3.0.7",
+		"yaml": "^2.2.1"
 	},
 	"scripts": {}
 }

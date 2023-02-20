@@ -1,14 +1,14 @@
 {
-	"name": "jargon",
-	"description": "Keep a little glossary of confusing terms always handy.",
-	"author": "Txus Bach",
+	"name": "writer-name-handler",
+	"description": "Handle and process names in markdown documents.",
+	"author": "Stephen Reindl",
 	"license": "MIT",
-	"version": "1.0.1",
+	"version": "0.1.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/txus/jargon"
+		"url": "https://github.com/steven-r/writer-name-handler.git"
 	},
-	"publisher": "txus",
+	"publisher": "sreindl",
 	"categories": [],
 	"keywords": [
 		"multi-root ready"
@@ -17,15 +17,16 @@
 		"vscode": "^1.43.0"
 	},
 	"activationEvents": [
-		"workspaceContains:**/.jargon.yml"
+		"workspaceContains:**/names.yml",
+		"workspaceContains:**/names.yaml",
+		"onLanguage:plaintext"
 	],
-
 	"main": "./client/out/extension",
 	"contributes": {
 		"commands": [
 			{
-				"command": "jargon.restartServer",
-				"title": "Jargon: Restart Language Server"
+				"command": "writer-name-handler.restartServer",
+				"title": "Writer Name Handler: Restart Language Server"
 			}
 		]
 	},
@@ -38,12 +39,13 @@
 		"test": "sh ./scripts/e2e.sh"
 	},
 	"devDependencies": {
-		"@types/mocha": "^8.2.2",
-		"@types/node": "^12.12.0",
-		"@typescript-eslint/eslint-plugin": "^4.23.0",
-		"@typescript-eslint/parser": "^4.23.0",
-		"eslint": "^7.26.0",
-		"mocha": "^8.3.2",
-		"typescript": "^4.4.3"
+		"@types/glob": "^8.0.1",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "^18.14.0",
+		"@typescript-eslint/eslint-plugin": "^5.52.0",
+		"@typescript-eslint/parser": "^5.52.0",
+		"eslint": "^8.34.0",
+		"mocha": "^10.2.0",
+		"typescript": "^4.9.5"
 	}
 }

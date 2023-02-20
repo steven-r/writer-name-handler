@@ -1,22 +1,22 @@
 {
-	"name": "jargon-lsp-client",
-	"description": "Jargon LSP Client for VSCode",
-	"author": "Txus Bach",
+	"name": "writer-name-handler",
+	"description": "Writer names Client for VSCode",
+	"author": "Stephen Reindl",
 	"license": "MIT",
 	"version": "1.0",
 	"publisher": "vscode",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/txus/jargon"
+		"url": "https://github.com/stephen-r/writer-name-handler.git"
 	},
 	"engines": {
-		"vscode": "^1.52.0"
+		"vscode": "^1.75.1"
 	},
 	"dependencies": {
-		"vscode-languageclient": "^7.0.0"
+		"vscode-languageclient": "^8.1.0"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.52.0",
-		"@vscode/test-electron": "^1.6.1"
+		"@types/vscode": "^1.75.1",
+		"@vscode/test-electron": "^2.2.3"
 	}
 }

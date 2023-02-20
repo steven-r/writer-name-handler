@@ -10,15 +10,17 @@ export let doc: vscode.TextDocument;
 export let editor: vscode.TextEditor;
 export let documentEol: string;
 export let platformEol: string;
+export let names: vscode.TextDocument;
 
 /**
  * Activates the extension
  */
 export async function activate(docUri: vscode.Uri) {
 	// The extensionId is `publisher.name` from package.json
-	const ext = vscode.extensions.getExtension('txus.jargon')!;
+	const ext = vscode.extensions.getExtension('steven-r.writer-name-handler')!;
 	await ext.activate();
 	try {
+		names = await vscode.workspace.openTextDocument('names.yml');
 		doc = await vscode.workspace.openTextDocument(docUri);
 		editor = await vscode.window.showTextDocument(doc);
 		await sleep(2000); // Wait for server activation

@@ -1,50 +1,48 @@
-# Jargon
+# markdown name handler for Visual Studio Code
 
-Names are important. They are also often confusing, or there are more than one for a single meaning.
+This plugin handles names to be used in markdown files. The syntax is similar to the pandoc-gls plugin.
 
-Jargon lets you keep a `.jargon.yml` file at the root of you project with a glossary of terms and their aliases under a `global` namespace:
+To enable this plugin, create one or more files named `names.yml` or `names.yaml`.
 
-```yaml
-global:
-  reward_decay:
-    aka: gamma
-    description: The discount factor used when calculating future returns.
-  entropy:
-    description: How varied a probability distribution is.
-  alpha:
-    aka:
-      - learning_rate
-      - lr
-    description: How big a step we take in each learning step.
-```
+Names are wrapped in parents and marked with an exclamation mark, e.g. (-Mike) will be the name "Mike".
 
-Every time you encounter `reward_decay`, `gamma`, `entropy`, `alpha`, `learning_rate` or `lr` in your codebase, a little hover will tell you more about the term.
+An example would be
 
-## What if jargon is context-dependent?
+    # Some text
 
-That's what namespaces are for. If within the folder `subcomponent/foo` you have a different meaning for the word `alpha`, you can do this:
+    Once upon a time, there was a thief, (-Mike) Hauser, and his wife, (-Maren).
+    (-He@Mike) is also very well known as (-Tunder).
+
+Given the following configuration file:
 
 ```yaml
-global:
-  alpha:
-    aka:
-      - learning_rate
-      - lr
-    description: How big a step we take in each learning step
-"subcomponent/foo":
-  alpha:
-    aka:
-      - transparency
-    description: How transparent an image is, from 0 (no transparency) to 1 (fully transparent).
+Mike Folder:
+  aka:
+    - Mike
+    - Thunder
+  description: |
+    Mike is a 54 year old thief. [...]
+    During his time at the ary he has been called 'Thunder'.
+
+Maren Folder:
+  aka: Maren
+  description: Mike's wife.
 ```
 
-Namespaces are matched as substrings of the current file path, so in `a/b/c/subcomponent/foo/x/y/z/my_file.ext`, `alpha` would resolve to the `subcomponent/foo`'s contextual meaning.
+Every time you encounter `(-Mike Folder)`, `(-Mike)`, `(-Thunder)`, or `(-he@mike)` in your texts, a little hover will tell you more about the term.
+In case the term is not defined, the entry is marked as an error.
+
+Configuration files are being read while opening a workspace and are refreshed while changing these files.
+
+## Configuration files
+
+You can use the configuration files to create glossary files or abbrovation files for other output languages.
 
 ## Functionality of the Language Server
 
 This Language Server works for any files. It has the following language features:
-- Diagnostics regenerated on each change of `.jargon.yml` in any workspace root folder, or if `.jargon.known.yml` changes.
-- Code actions to mark some terms as known, which will hide them from the user. These known terms are persisted in `.jargon.known.yml`, which should *not* be version-controlled (as each team member will want to hide different terms).
+
+- Diagnostics regenerated on each change of `names.yml` in any workspace folder.
 
 It also includes an End-to-End test.
 

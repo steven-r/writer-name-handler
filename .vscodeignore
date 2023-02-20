@@ -1,6 +1,10 @@
 .vscode/**
+*.vsix
 **/*.ts
 **/*.map
+**/test
+**/testFixture
+**/scripts
 .gitignore
 **/tsconfig.json
 **/tsconfig.base.json
