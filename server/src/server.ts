@@ -22,7 +22,7 @@ import { Glossary } from './Glossary';
 import { glob } from 'glob';
 import { URI } from 'vscode-uri';
 
-const PATTERN = /\(\+(?<pattern>[^+)]+)(\+(?<source>[^)]+))?\)/g;
+const PATTERN = /\(-(?<pattern>[^@)]+)(@(?<source>[^)]+))?\)/g;
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -75,7 +75,6 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 function reloadGlossary(folders: WorkspaceFolder[]) {
-	//glossary = compileGlossaryFromWorkspaceFolders(folders);
 	documents.all().forEach(validateTextDocument);
 }
 
@@ -175,6 +174,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		};
 		diagnostics.push(diagnostic);
 	}
+	// BE AWARE: The following line fills your log
+	// connection.console.log(`Process ${textDocument.uri}: ${text.length} -> ${diagnostics.length}`);
 
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
