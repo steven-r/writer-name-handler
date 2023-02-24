@@ -32,7 +32,7 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "npm run compile:client; npm run compile:server",
+        "compile": "npm run compile:client && npm run compile:server",
         "compile:client": "tsc -p ./client",
         "compile:server": "tsc -p ./server",
         "watch": "tsc -b -w",
