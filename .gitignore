@@ -4,3 +4,5 @@ client/server
 .vscode-test
 *.vsix
 client/testFixture/.vscode/settings.json
+client/tsconfig.tsbuildinfo
+server/tsconfig.tsbuildinfo
