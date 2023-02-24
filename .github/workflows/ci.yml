@@ -1,5 +1,4 @@
-// copied and adapted from https://github.com/vscode-shellcheck/vscode-shellcheck
-
+# copied and adapted from https://github.com/vscode-shellcheck/vscode-shellcheck
 name: ci
 
 on:
