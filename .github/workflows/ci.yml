@@ -62,10 +62,12 @@ jobs:
         name: Install dependencies (without binaries)
         run: npm ci
 
+      # workaround for https://github.com/cycjimmy/semantic-release-action/issues/150
+      - run: cp package.release.config.js release.config.js
       - name: Action For Semantic Release
         uses: cycjimmy/semantic-release-action@v3.2.0
-        with:
-          extends: "./package.release.config.js"
+        #with:
+        #  extends: "./package.release.config.js"
         env:
           VSCE_TARGET: ${{ matrix.target }}
           GH_TOKEEN: ${{ secrets.SEMVER_TOKEN }}
@@ -97,12 +99,15 @@ jobs:
 
       - uses: actions/download-artifact@v3
 
-      # Only run on push events or pull requests coming from the same repository, except from dependabot
+      # workaround for https://github.com/cycjimmy/semantic-release-action/issues/150
+      - run: cp publish.release.config.js release.config.js
+        if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
       - name: Action For Semantic Release
         uses: cycjimmy/semantic-release-action@v3.2.0
+        # Only run on push events or pull requests coming from the same repository, except from dependabot
         if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
-        with:
-          extends: "./publish.release.config.js"
+        #with:
+        #  extends: "./publish.release.config.js"
         env:
           GITHUB_TOKEN: ${{ secrets.SEMVER_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
