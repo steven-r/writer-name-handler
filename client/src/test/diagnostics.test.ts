@@ -60,5 +60,7 @@ async function runDiagnosticsTest(text: string, expected: vscode.Diagnostic[]) {
 				await sleep(1000);
 				testDiagnostics(doc.uri, expected);
 			});
+	}, (reason) => {
+		throw new Error(reason);
 	});
 }
