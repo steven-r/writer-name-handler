@@ -38,9 +38,7 @@ export class Glossary {
 			if (uri.scheme !== "file") {
 				this.connection.console.warn(`Cannot process scheme ${uri.scheme} for ${path}`);
 			}
-			this.connection.console.log(`path: ${uri.path}`);
-			this.connection.console.log(`path: ${uri.fsPath}`);
-			const file = readFileSync(uri.path, 'utf8');
+			const file = readFileSync(uri.fsPath, 'utf8');
 			const doc = YAML.parse(file);
 			this.forgetFile(uri.path);
 			let cnt = 0;
