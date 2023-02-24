@@ -38,6 +38,8 @@ export class Glossary {
 			if (uri.scheme !== "file") {
 				this.connection.console.warn(`Cannot process scheme ${uri.scheme} for ${path}`);
 			}
+			this.connection.console.log(`path: ${uri.path}`);
+			this.connection.console.log(`path: ${uri.fsPath}`);
 			const file = readFileSync(uri.path, 'utf8');
 			const doc = YAML.parse(file);
 			this.forgetFile(uri.path);
@@ -45,7 +47,7 @@ export class Glossary {
 			let aliases = 0;
 			for (const [termName, value] of Object.entries(doc)) {
 				const v = value as any;
-				const termAka = v['aka'] as string[];
+				const termAka = v['aka'];
 				const termDesc = v['description'];
 
 				const term: Term = new Term(termName, uri.path, termDesc);
@@ -62,11 +64,11 @@ export class Glossary {
 					this.terms.set(aka.lowercaseName, aka);
 				});
 			}
+
 			this.connection.console.log(`Loaded ${path}: Terms: ${cnt}, aliases: ${aliases}`);
 		}
 		catch (e: any) {
 			this.connection.console.error(`Error loading ${path}`);
-			this.connection.console.error(e.message);
 			if (e.stack) {
 				this.connection.console.error(e.stack);
 			}
