@@ -1,5 +1,5 @@
 {
     "[markdown]": {
-        "editor.cursorSurroundingLines": 5
+        "editor.cursorSurroundingLines": 8
     }
 }

@@ -7,5 +7,8 @@
 	},
 	"conventionalCommits.scopes": [
 		"server"
+	],
+	"marquee.widgets.npm-stats.packageNames": [
+		"writer-name-handler"
 	]
 }

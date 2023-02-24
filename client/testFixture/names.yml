@@ -9,7 +9,13 @@ notused:
     - test
   description: How big a step we take in each learning step
 
+Martin:
+  description: Capital
+
 here:
   description: |
     Some more text that is used to display information being
     spread over several lines.
+
+DEC:
+  description: Digital Equipment Corporation

@@ -1,0 +1,104 @@
+// copied and adapted from https://github.com/vscode-shellcheck/vscode-shellcheck
+
+name: ci
+
+on:
+  push:
+    branches: [main,next]
+  pull_request:
+    branches: [main]
+  # This is to catch new releases of VS Code which could cause the extension to break
+  schedule:
+    - cron: 0 0 * * *
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        vscode-version: [stable]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: lts/*
+
+      - run: npm build
+
+      - name: Test with VS Code ${{ matrix.vscode-version }}
+        uses: GabrielBB/xvfb-action@v1
+        env:
+          VSCODE_TEST_VERSION: ${{ matrix.vscode-version }}
+        with:
+          run: npm test
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: universal
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: lts/*
+
+      - if: matrix.target != 'universal'
+        name: Install dependencies (with binaries)
+        run: npm build
+        env:
+          npm_config_arch: ${{ matrix.npm_config_arch }}
+      - if: matrix.target == 'universal'
+        name: Install dependencies (without binaries)
+        run: npm build
+        env:
+          BINDL_SKIP: "true"
+
+      - run: npx semantic-release --extends ./package.release.config.js
+        env:
+          VSCE_TARGET: ${{ matrix.target }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          # OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: "*.vsix"
+
+  release:
+    if: github.event_name != 'schedule'
+
+    needs: [test, build]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: lts/*
+
+      - run: npm build
+
+      - uses: actions/download-artifact@v3
+
+      # Only run on push events or pull requests coming from the same repository, except from dependabot
+      - run: npx semantic-release --extends ./publish.release.config.js
+        if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          # OVSX_PAT: ${{ secrets.OVSX_PAT }}
