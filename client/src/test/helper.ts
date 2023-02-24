@@ -6,30 +6,35 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export let doc: vscode.TextDocument;
-export let editor: vscode.TextEditor;
+export let ext: vscode.Extension<any>;
 export let documentEol: string;
 export let platformEol: string;
-export let names: vscode.TextDocument;
 
 /**
  * Activates the extension
  */
-export async function activate(docUri: vscode.Uri) {
+export async function activate(): Promise<any> {
+	if (ext) 
+		return ext;
 	// The extensionId is `publisher.name` from package.json
-	const ext = vscode.extensions.getExtension('steven-r.writer-name-handler')!;
-	await ext.activate();
+	ext = vscode.extensions.getExtension('sreindl.writer-name-handler')!;
+	return ext.activate();
+}
+
+export async function openDocument(docUri: vscode.Uri): Promise<[vscode.TextDocument, vscode.TextEditor]> {
+	let doc: vscode.TextDocument;
+	let editor: vscode.TextEditor;
 	try {
-		names = await vscode.workspace.openTextDocument('names.yml');
 		doc = await vscode.workspace.openTextDocument(docUri);
 		editor = await vscode.window.showTextDocument(doc);
-		await sleep(2000); // Wait for server activation
 	} catch (e) {
 		console.error(e);
 	}
+	return Promise.all<[vscode.TextDocument, vscode.TextEditor]>
+		([doc, editor]);
 }
 
-async function sleep(ms: number) {
+export async function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -40,7 +45,9 @@ export const getDocUri = (p: string) => {
 	return vscode.Uri.file(getDocPath(p));
 };
 
-export async function setTestContent(content: string): Promise<boolean> {
+export async function setTestContent(doc: vscode.TextDocument, 
+	editor: vscode.TextEditor, 
+	content: string): Promise<boolean> {
 	const all = new vscode.Range(
 		doc.positionAt(0),
 		doc.positionAt(doc.getText().length)

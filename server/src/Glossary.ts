@@ -12,7 +12,7 @@ export class Term {
 	public description?: string;
 	public namespace: string;
 
-	constructor (name: string, namespace: string, description?: string, parent?: Term) {
+	constructor(name: string, namespace: string, description?: string, parent?: Term) {
 		this.name = name;
 		this.lowercaseName = name.toLowerCase();
 		this.aka = [];
@@ -28,42 +28,51 @@ export class Glossary {
 	terms: Map<string, Term> = new Map();
 	connection: Connection;
 
-	constructor (connection: Connection) {
+	constructor(connection: Connection) {
 		this.connection = connection;
 	}
-	
-	loadFile(path: string) {
-		const uri = URI.parse(path);
-		if (uri.scheme !== "file") {
-			this.connection.console.warn(`Cannot process scheme ${uri.scheme} for ${path}`);
-		}
-		const file = readFileSync(uri.path, 'utf8');
-		const doc = YAML.parse(file);
-		this.forgetFile(uri.path);
-		let cnt = 0;
-		let aliases = 0;
-		for (const [termName, value] of Object.entries(doc)) {
-			const v = value as any;
-			const termAka = v['aka'] as string[];
-			const termDesc = v['description'];
 
-			const term: Term = new Term(termName, uri.path, termDesc);
-			if (typeof termAka === 'string') {
-				term.aka.push(termAka);
-			} else if (Array.isArray(termAka)) {
-				term.aka.push(... termAka);
+	loadFile(path: string) {
+		try {
+			const uri = URI.parse(path);
+			if (uri.scheme !== "file") {
+				this.connection.console.warn(`Cannot process scheme ${uri.scheme} for ${path}`);
 			}
-			this.terms.set(term.lowercaseName, term);
-			cnt++;
-			term.aka.forEach(a => {
-				aliases++;
-				const aka = new Term(a, uri.path, undefined, term);
-				this.terms.set(aka.lowercaseName, aka);
-			});
+			const file = readFileSync(uri.fsPath, 'utf8');
+			const doc = YAML.parse(file);
+			this.forgetFile(uri.path);
+			let cnt = 0;
+			let aliases = 0;
+			for (const [termName, value] of Object.entries(doc)) {
+				const v = value as any;
+				const termAka = v['aka'];
+				const termDesc = v['description'];
+
+				const term: Term = new Term(termName, uri.path, termDesc);
+				if (typeof termAka === 'string') {
+					term.aka.push(termAka);
+				} else if (Array.isArray(termAka)) {
+					term.aka.push(...termAka);
+				}
+				this.terms.set(term.lowercaseName, term);
+				cnt++;
+				term.aka.forEach(a => {
+					aliases++;
+					const aka = new Term(a, uri.path, undefined, term);
+					this.terms.set(aka.lowercaseName, aka);
+				});
+			}
+
+			this.connection.console.log(`Loaded ${path}: Terms: ${cnt}, aliases: ${aliases}`);
 		}
-		this.connection.console.log(`Loaded ${path}: Terms: ${cnt}, aliases: ${aliases}`);
+		catch (e: any) {
+			this.connection.console.error(`Error loading ${path}`);
+			if (e.stack) {
+				this.connection.console.error(e.stack);
+			}
+		}
 	}
-	
+
 	isEmpty(): boolean {
 		return this.namespaces.length === 0;
 	}
@@ -92,7 +101,7 @@ export class Glossary {
 		if (uri.scheme !== "file") {
 			this.connection.console.warn(`Cannot process scheme ${uri.scheme} for ${path}`);
 		}
-		this.terms = new Map([...this.terms].filter(([k,v]) => v.namespace !== uri.path));
+		this.terms = new Map([...this.terms].filter(([k, v]) => v.namespace !== uri.path));
 		this.namespaces = this.namespaces.filter(ns => ns !== uri.path);
 	}
 }

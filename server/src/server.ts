@@ -21,6 +21,7 @@ import {
 import { Glossary } from './Glossary';
 import { glob } from 'glob';
 import { URI } from 'vscode-uri';
+import { resolve } from 'path';
 
 const PATTERN = /\(-(?<pattern>[^@)]+)(@(?<source>[^)]+))?\)/g;
 
@@ -235,24 +236,16 @@ connection.listen();
 
 function compileGlossaryFromWorkspaceFolders(workspaceFolders: WorkspaceFolder[]) {
 	workspaceFolders.forEach(folder => {
-		connection.console.log(`Processing folder ${folder.name}/${folder.uri}`);
-		const uri = URI.parse(folder.uri).fsPath;
-		glob(`${uri}/**/names.yaml`, (err, matches) => {
+		connection.console.log(`Processing folder ${folder.name}: ${folder.uri}`);
+		const uri = URI.parse(folder.uri);
+		const path = uri.fsPath || uri.path;
+		glob('**/names.y?(a)ml', {cwd: path}, (err, matches) => {
 			if (err) {
 				connection.console.warn(err.message);
 				return;
 			}
 			matches.forEach(match => {
-				glossary.loadFile(URI.file(match).toString());
-			});
-		});
-		glob(`${uri}/**/names.yml`, (err, matches) => {
-			if (err) {
-				connection.console.warn(err.message);
-				return;
-			}
-			matches.forEach(match => {
-				glossary.loadFile(URI.file(match).toString());
+				glossary.loadFile(URI.file(resolve(path, match)).toString());
 			});
 		});
 	});
