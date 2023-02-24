@@ -65,7 +65,11 @@ export class Glossary {
 			this.connection.console.log(`Loaded ${path}: Terms: ${cnt}, aliases: ${aliases}`);
 		}
 		catch (e: any) {
-			this.connection.console.error(e);
+			this.connection.console.error(`Error loading ${path}`);
+			this.connection.console.error(e.message);
+			if (e.stack) {
+				this.connection.console.error(e.stack);
+			}
 		}
 	}
 
