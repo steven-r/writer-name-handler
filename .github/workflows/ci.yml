@@ -68,6 +68,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SEMVER_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
           # OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
