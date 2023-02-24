@@ -5,6 +5,7 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
+import * as fs from 'fs';
 
 export function run(): Promise<void> {
 	// Create the mocha test
@@ -29,6 +30,7 @@ export function run(): Promise<void> {
 				// Run the mocha test
 				mocha.run(failures => {
 					if (failures > 0) {
+						grabExtensionOutput(mocha);
 						reject(new Error(`${failures} tests failed.`));
 					} else {
 						resolve();
@@ -40,4 +42,15 @@ export function run(): Promise<void> {
 			}
 		});
 	});
+}
+
+function grabExtensionOutput(mocha: Mocha): string[] {
+	const res: string[] = [];
+	const logFolder = path.resolve(__dirname, '../../../.vscode-test/user-data/logs');
+	const files = glob.sync('**/*1-Writer Names Language Server.log', { cwd: logFolder });
+	files.forEach(f => {
+		const text = fs.readFileSync(path.resolve(logFolder, f), 'utf8');
+		console.warn(`Error output of ${f}:\n${text}`);
+	});
+	return res;
 }
