@@ -8,7 +8,7 @@ import * as assert from 'assert';
 import { getDocUri, activate, setTestContent, sleep } from './helper';
 
 suite('Should get diagnostics', () => {
-	test('Check simple one', async () => {
+/*	test('Check simple one', async () => {
 		await runDiagnosticsTest('(-test)', [
 			{
 				message: 'notused:  Also known as learning_rate, **test**.\n' +
@@ -20,6 +20,7 @@ suite('Should get diagnostics', () => {
 			},
 		]);
 	});
+	*/
 	test('Check no diagnostics', async () => {
 		await runDiagnosticsTest('Some simple text.', []);
 	});

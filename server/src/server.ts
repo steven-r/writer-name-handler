@@ -11,19 +11,31 @@ import {
 	Command,
 	CodeActionKind,
 	FileEvent,
-	FileChangeType
-} from 'vscode-languageserver/node';
+	FileChangeType,
+	Hover,
+	MarkupKind,
+	DocumentHighlight,
+	DocumentDiagnosticParams,
+	FullDocumentDiagnosticReport,
+	DocumentDiagnosticReportKind,
+	TextDocumentSyncKind,
+	TextDocumentPositionParams,
+	SemanticTokens,
+	SemanticTokenTypes,
+	SemanticTokensParams} from 'vscode-languageserver/node';
 
 import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
-import { Glossary } from './Glossary';
+import { Glossary, Term } from './Glossary';
 import { glob } from 'glob';
 import { URI } from 'vscode-uri';
 import { resolve } from 'path';
+import { RetrieveNamesRequest, RetrieveNamesResponse } from './protocolExtension';
 
 const PATTERN = /\(-(?<pattern>[^@)]+)(@(?<source>[^)]+))?\)/g;
+const HOVER_PATTERN = /^\(-(?<pattern>[^@)]+)(@(?<source>[^)]+))?\)/;
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -59,9 +71,30 @@ connection.onInitialize((params: InitializeParams) => {
 
 	const result: InitializeResult = {
 		capabilities: {
+			textDocumentSync: TextDocumentSyncKind.Incremental,
 			codeActionProvider: true,
+			hoverProvider: true,
 			executeCommandProvider: {
 				commands: ['writer-name-handler.markAsKnown']
+			},
+			documentHighlightProvider: true,
+			diagnosticProvider: {
+				documentSelector: null,
+				interFileDependencies: false,
+				workspaceDiagnostics: false,
+			},
+			semanticTokensProvider: {
+				range: false,
+				full: {
+					delta: false
+				},
+				legend: {
+					tokenTypes: [
+						SemanticTokenTypes.macro,
+					],
+					tokenModifiers: [
+					]
+				}
 			}
 		}
 	};
@@ -92,15 +125,182 @@ connection.onInitialized(() => {
 	}
 });
 
+connection.onHover(({ textDocument, position }): Hover | undefined => {
+	const document = documents.get(textDocument.uri);
+	if (!document) {
+		return undefined;
+	}
+	const line = document.getText(
+		{
+			start: { line: position.line, character: 0 },
+			end: { line: position.line + 1, character: 0 }
+		}
+	);
 
-// The content of a text document has changed. This event is emitted
-// when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-	validateTextDocument(change.document);
+	// check if a pattern is in the range of the current position
+	let startChar = position.character;
+	let m: RegExpMatchArray | null = null;
+	let found = false;
+	while (startChar > 0) {
+		if (line.charAt(startChar) == '('
+			&& (m = line.substring(startChar).match(HOVER_PATTERN))
+			&& m[0].length + startChar > position.character) {
+			found = true;
+			break;
+		}
+		--startChar;
+	}
+	if (m && m.groups && found) {
+		const quote = m.groups['source'] || m.groups['pattern'];
+		const term = glossary.resolve(quote);
+		if (term) {
+			connection.console.log(`Found '${quote}' at position ${startChar}`);
+			const markdown = {
+				kind: MarkupKind.Markdown,
+				value: formatTerm(term, quote)
+			};
+			return {
+				contents: markdown,
+				range: {
+					start: { line: position.line, character: startChar },
+					end: { line: position.line, character: startChar + m[0].length }
+				}
+			};
+		}
+	} else {
+		return undefined;
+	}
+});
+
+connection.onDidChangeWatchedFiles(change => {
+	change.changes.forEach((element: FileEvent) => {
+		if (element.type == FileChangeType.Created || element.type == FileChangeType.Changed) {
+			glossary.loadFile(element.uri);
+		} else if (element.type == FileChangeType.Deleted) {
+			glossary.forgetFile(element.uri);
+		}
+	});
+});
+
+connection.onCodeAction(params => {
+	const diagnostics = params.context.diagnostics;
+	if (!diagnostics || diagnostics.length === 0) {
+		return [];
+	}
+
+	const textDocument = documents.get(params.textDocument.uri);
+	if (textDocument === undefined) {
+		return undefined;
+	}
+
+	const codeActions: CodeAction[] = [];
+	diagnostics.forEach((diag) => {
+		if (diag.source === 'jargon') {
+			codeActions.push({
+				title: 'Mark as known',
+				kind: CodeActionKind.QuickFix,
+				diagnostics: [diag],
+				command: Command.create('Mark as known', 'jargon.markAsKnown', (diag.data! as any))
+			});
+		}
+	});
+	return codeActions;
 });
 
 
-async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+connection.onDocumentHighlight(({ textDocument, position }: TextDocumentPositionParams): DocumentHighlight[] => {
+	connection.console.log(`onDocumentHighlight(position: ${position.line}/${position.character})`);
+	const doc = documents.get(textDocument.uri);
+	if (!doc) {
+		return [];
+	}
+	return [];
+});
+
+connection.languages.diagnostics.on((params: DocumentDiagnosticParams): FullDocumentDiagnosticReport => {
+	const doc = documents.get(params.textDocument.uri);
+	const res: FullDocumentDiagnosticReport = {
+		kind: DocumentDiagnosticReportKind.Full,
+		items: []
+	};
+	if (doc) {
+		res.items = validateTextDocument(doc);
+	}
+	return res;
+});
+
+connection.onRequest(RetrieveNamesRequest.method, (): RetrieveNamesResponse => {
+	return {
+		terms: [... glossary.terms.values()]
+			.filter(t => t.term === undefined)
+	};
+});
+
+connection.onExecuteCommand(async (params) => {
+	if (params.command !== 'writer-name-handler.markAsKnown' || params.arguments === undefined) {
+		return;
+	}
+	const args = params.arguments[0];
+	const termName = args.termName;
+
+	connection.window.showInformationMessage(`Writer-Name-Handler won't underline '${termName}' for you anymore in this context. If you change your mind, you can delete it from .jargon.known.yml at the root of your workspace.`);
+});
+
+connection.languages.semanticTokens.on(({textDocument}: SemanticTokensParams): SemanticTokens => {
+	const doc = documents.get(textDocument.uri);
+	if (!doc) {
+		return { data: [] };
+	}
+	return { data: buildSemanticTokens(doc) };
+});
+
+// Make the text document manager listen on the connection
+// for open, change and close text document events
+documents.listen(connection);
+
+// Listen on the connection
+connection.listen();
+
+function compileGlossaryFromWorkspaceFolders(workspaceFolders: WorkspaceFolder[]) {
+	workspaceFolders.forEach(folder => {
+		connection.console.log(`Processing folder ${folder.name}: ${folder.uri}`);
+		const uri = URI.parse(folder.uri);
+		const path = uri.fsPath || uri.path;
+		glob('**/names.y?(a)ml', { cwd: path }, (err, matches) => {
+			if (err) {
+				connection.console.warn(err.message);
+				return;
+			}
+			matches.forEach(match => {
+				glossary.loadFile(URI.file(resolve(path, match)).toString());
+			});
+		});
+	});
+}
+
+function formatTerm(term: Term, quote: string): string {
+	const parts = [];
+	let aka: string[] = term.aka;
+	if (term.term) {
+		term = term.term;
+	}
+	if (term.aka.length > 0) {
+		aka = term.aka.map(x => x == quote ? `**${x}**` : x);
+		const name = term.lowercaseName == quote.toLowerCase() ? `**${term.name}**` : term.name;
+		parts.push(`${name}:  Also known as ${aka.join(', ')}.`);
+		if (term.description) {
+			parts.push(term.description);
+		}
+	} else if (term.description) {
+		parts.push(`**${term.name}**: ${term.description}`);
+	} else {
+		parts.push(`**${term.name}**: *No description available*`);
+	}
+
+	return parts.join('\n\n');
+}
+
+function validateTextDocument(textDocument: TextDocument): Diagnostic[] {
 	const text = textDocument.getText();
 	let m: RegExpExecArray | null;
 
@@ -109,42 +309,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		while ((m = PATTERN.exec(text)) && m.groups) {
 			const res = m.groups['source'] || m.groups['pattern'];
 			const found = glossary.resolve(res);
-			if (found) {
-				const parts = [];
-				let term = found;
-				let aka: string[] = term.aka;
-				if (term.term) {
-					term = term.term;
-				}
-				if (term.aka.length > 0) {
-					aka = term.aka.map(x => x == res ? `**${x}**` : x);
-					parts.push(`${term.name}:  Also known as ${aka.join(', ')}.`);
-				} else {
-					parts.push(`${term.name},`);
-				}
-				if (term.description !== undefined) {
-					parts.push(term.description);
-				}
-	
-				const message = parts.join('\n\n');
-				const diagnostic: Diagnostic = {
-					severity: DiagnosticSeverity.Information,
-					range: {
-						start: textDocument.positionAt(m.index),
-						end: textDocument.positionAt(m.index + m[0].length)
-					},
-					message: message,
-					source: 'writer-names',
-					data: {
-						termName: term.name
-					}
-				};
-				if (hasDiagnosticRelatedInformationCapability) {
-					diagnostic.relatedInformation = [];
-				}
-	
-				diagnostics.push(diagnostic);
-			} else {
+			if (!found) {
 				const diagnostic: Diagnostic = {
 					severity: DiagnosticSeverity.Warning,
 					range: {
@@ -160,7 +325,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 				if (hasDiagnosticRelatedInformationCapability) {
 					diagnostic.relatedInformation = [];
 				}
-	
 				diagnostics.push(diagnostic);
 			}
 		}
@@ -175,78 +339,53 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		};
 		diagnostics.push(diagnostic);
 	}
-	// BE AWARE: The following line fills your log
+	// BE AWARE: The following line floods your log
 	// connection.console.log(`Process ${textDocument.uri}: ${text.length} -> ${diagnostics.length}`);
 
-	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+	return diagnostics;
 }
 
-connection.onDidChangeWatchedFiles(change => {
-	change.changes.forEach((element: FileEvent) => {
-		if (element.type == FileChangeType.Created || element.type == FileChangeType.Changed) {
-			glossary.loadFile(element.uri);
-		} else if (element.type == FileChangeType.Deleted) {
-			glossary.forgetFile(element.uri);
-		}
-	});
-});
+function buildSemanticTokens(textDocument: TextDocument): number[] {
+	let currentLine = 0;
+	let currentCharacter = 0;
+	const tokens: number[] = [];
 
-connection.onCodeAction(params => {
-	const diagnostics = params.context.diagnostics;
-    if (!diagnostics || diagnostics.length === 0) {
-        return [];
-    }
+	const text = textDocument.getText();
+	let m: RegExpExecArray | null;
 
-	const textDocument = documents.get(params.textDocument.uri);
-	if (textDocument === undefined) {
-		return undefined;
-	}
-
-	const codeActions: CodeAction[] = [];
-    diagnostics.forEach((diag) => {
-		if (diag.source === 'jargon') {
-			codeActions.push({
-				title: 'Mark as known',
-				kind: CodeActionKind.QuickFix,
-				diagnostics: [diag],
-				command: Command.create('Mark as known', 'jargon.markAsKnown', (diag.data! as any))
-			});
-		}
-	});
-	return codeActions;
-});
-
-connection.onExecuteCommand(async (params) => {
-	if (params.command !== 'jargon.markAsKnown' || params.arguments === undefined) {
-		return;
-	}
-	const args = params.arguments[0];
-	const termName = args.termName;
-
-	connection.window.showInformationMessage(`Jargon won't underline '${termName}' for you anymore in this context. If you change your mind, you can delete it from .jargon.known.yml at the root of your workspace.`);
-});
-
-// Make the text document manager listen on the connection
-// for open, change and close text document events
-documents.listen(connection);
-
-// Listen on the connection
-connection.listen();
-
-function compileGlossaryFromWorkspaceFolders(workspaceFolders: WorkspaceFolder[]) {
-	workspaceFolders.forEach(folder => {
-		connection.console.log(`Processing folder ${folder.name}: ${folder.uri}`);
-		const uri = URI.parse(folder.uri);
-		const path = uri.fsPath || uri.path;
-		glob('**/names.y?(a)ml', {cwd: path}, (err, matches) => {
-			if (err) {
-				connection.console.warn(err.message);
-				return;
+	const lines = text.split(/\r\n|\r|\n/g);
+	try {
+		for (let lineno = 0; lineno < lines.length; lineno++) {
+			while ((m = PATTERN.exec(lines[lineno])) && m.groups) {
+				const res = m.groups['source'] || m.groups['pattern'];
+				const found = glossary.resolve(res);
+				if (found) {
+					const tokenLine = lineno - currentLine;
+					if (tokenLine > 0) {
+						currentCharacter = 0; // restart line
+						currentLine = lineno;
+					}
+					const len = m[0].length;
+					//connection.console.log(` build token: [${tokenLine}, ${m.index - currentCharacter}, ${len}, 0, 0]`);
+					tokens.push(tokenLine, m.index - currentCharacter, len, 0, 0);
+					currentCharacter = m.index;
+				}
 			}
-			matches.forEach(match => {
-				glossary.loadFile(URI.file(resolve(path, match)).toString());
-			});
+		}
+	} catch (error: any) {
+		connection.console.error(error.message);
+		const diagnostic: Diagnostic = {
+			severity: DiagnosticSeverity.Error,
+			message: error.message,
+			range: {
+				start: textDocument.positionAt(0), end: textDocument.positionAt(1)
+			},
+		};
+		connection.sendDiagnostics({
+			uri: textDocument.uri,
+			diagnostics: [diagnostic]
 		});
-	});
+	}
+
+	return tokens;
 }

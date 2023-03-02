@@ -4,7 +4,7 @@ module.exports = {
 		"main",
 		{
 			"name": "next",
-			"prepublish": true
+			"prerelease": true
 		}
 	],
 	plugins: [

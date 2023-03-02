@@ -1,3 +1,14 @@
+## [2.0.0-next.1](https://github.com/steven-r/writer-name-handler/compare/v1.0.0...v2.0.0-next.1) (2023-03-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* Use hints instead of underlined words.
+
+### Features
+
+* general overnaul ([d624cd7](https://github.com/steven-r/writer-name-handler/commit/d624cd7f215fccc417b8ce8ace32d3a1cbef1d2e))
+
 ## 1.0.0 (2023-02-24)
 
 
