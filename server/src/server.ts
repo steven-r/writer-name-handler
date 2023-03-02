@@ -271,12 +271,12 @@ function compileGlossaryFromWorkspaceFolders(workspaceFolders: WorkspaceFolder[]
 		connection.console.log(`Processing folder ${folder.name}: ${folder.uri}`);
 		const uri = URI.parse(folder.uri);
 		const path = uri.fsPath || uri.path;
-		glob('**/names.y?(a)ml', { cwd: path }, (err, matches) => {
+		glob('**/names.y?(a)ml', { cwd: path }, (err: Error | null, matches: string[]) => {
 			if (err) {
 				connection.console.warn(err.message);
 				return;
 			}
-			matches.forEach(match => {
+			matches.forEach((match: string): void => {
 				glossary.loadFile(URI.file(resolve(path, match)).toString());
 			});
 		});
