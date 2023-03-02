@@ -1,4 +1,5 @@
 /* --------------------------------------------------------------------------------------------
+ * Copyright (c) Stephen Reindl. All rights reserved.
  * Copyright (c) Remy Suen. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
@@ -6,8 +7,6 @@ import * as child_process from "child_process";
 import * as assert from "assert";
 import { Diagnostic, DiagnosticSeverity, Hover, Position, Range } from "vscode-languageserver";
 import path from 'path';
-import exp from 'constants';
-import { SemanticTokens } from 'vscode';
 
 // fork the server and connect to it using Node IPC
 const lspProcess = child_process.fork("./out/server.js", ["--node-ipc"]);
