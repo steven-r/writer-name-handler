@@ -3,6 +3,25 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"args": [
+				"-u",
+				"bdd",
+				"--timeout",
+				"999999",
+				"--colors",
+				"${workspaceFolder}/server/out/test/serveractionTests.js"
+			],
+			"internalConsoleOptions": "openOnSessionStart",
+			"name": "Server Tests",
+			"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/server",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "node"
+		},
+		{
 			"type": "extensionHost",
 			"request": "launch",
 			"name": "Launch Client",

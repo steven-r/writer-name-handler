@@ -2,7 +2,7 @@ name:
   aka:
     - bar
   description: Some concept.
-notused:
+test:
   aka:
     - learning_rate
     - lr
