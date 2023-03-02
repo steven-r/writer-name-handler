@@ -39,9 +39,13 @@ export function activate(context: ExtensionContext) {
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for markdown documents
 		documentSelector: [{ scheme: 'file', language: 'markdown'}],
+		diagnosticPullOptions: {
+			onChange: true,
+			onTabs: true,
+		},
 		synchronize: {
 			// Notify the server about file changes to name declaration files contained in the workspace
-			fileEvents: [workspace.createFileSystemWatcher('**/names.yml'), workspace.createFileSystemWatcher('**/names.yaml')]
+			fileEvents: [workspace.createFileSystemWatcher('**/names.{yml,yaml}')]
 		}
 	};
 
@@ -65,6 +69,8 @@ export function activate(context: ExtensionContext) {
 	};
 
 	context.subscriptions.push(commands.registerCommand(command, commandHandler));
+
+	client.registerProposedFeatures();
 
 	// Start the client. This will also launch the server
 	client.start();

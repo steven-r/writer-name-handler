@@ -20,5 +20,12 @@
 		"vscode-uri": "^3.0.7",
 		"yaml": "^2.2.1"
 	},
-	"scripts": {}
+	"scripts": {
+		"test": "mocha ./out/test"
+	},
+	"devDependencies": {
+		"@types/mocha": "^10.0.1",
+		"@types/vscode": "^1.76.0",
+		"mocha": "^10.2.0"
+	}
 }
