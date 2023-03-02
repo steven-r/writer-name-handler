@@ -1,3 +1,10 @@
+## [2.0.1-next.1](https://github.com/steven-r/writer-name-handler/compare/v2.0.0...v2.0.1-next.1) (2023-03-02)
+
+
+### Code Refactoring
+
+* code refactor ([7dc6ccd](https://github.com/steven-r/writer-name-handler/commit/7dc6ccdc8357b14867638a1e932035cda1c370af))
+
 ## [2.0.0](https://github.com/steven-r/writer-name-handler/compare/v1.0.0...v2.0.0) (2023-03-02)
 
 
@@ -8,6 +15,13 @@
 ### Features
 
 * general overnaul ([d624cd7](https://github.com/steven-r/writer-name-handler/commit/d624cd7f215fccc417b8ce8ace32d3a1cbef1d2e))
+
+## [2.0.0-next.2](https://github.com/steven-r/writer-name-handler/compare/v2.0.0-next.1...v2.0.0-next.2) (2023-03-02)
+
+
+### Code Refactoring
+
+* code refactor ([7dc6ccd](https://github.com/steven-r/writer-name-handler/commit/7dc6ccdc8357b14867638a1e932035cda1c370af))
 
 ## [2.0.0-next.1](https://github.com/steven-r/writer-name-handler/compare/v1.0.0...v2.0.0-next.1) (2023-03-02)
 

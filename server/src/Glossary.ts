@@ -1,3 +1,7 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Stephen Reindl. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import { readFileSync } from 'fs';
 import { Connection, _Connection } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';

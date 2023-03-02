@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Stephen Reindl. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
+
 import {
 	createConnection,
 	TextDocuments,
@@ -22,14 +27,15 @@ import {
 	TextDocumentPositionParams,
 	SemanticTokens,
 	SemanticTokenTypes,
-	SemanticTokensParams} from 'vscode-languageserver/node';
+	SemanticTokensParams
+} from 'vscode-languageserver/node';
 
 import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
 import { Glossary, Term } from './Glossary';
-import { glob } from 'glob';
+import { glob, globSync } from 'glob';
 import { URI } from 'vscode-uri';
 import { resolve } from 'path';
 import { RetrieveNamesRequest, RetrieveNamesResponse } from './protocolExtension';
@@ -231,7 +237,7 @@ connection.languages.diagnostics.on((params: DocumentDiagnosticParams): FullDocu
 
 connection.onRequest(RetrieveNamesRequest.method, (): RetrieveNamesResponse => {
 	return {
-		terms: [... glossary.terms.values()]
+		terms: [...glossary.terms.values()]
 			.filter(t => t.term === undefined)
 	};
 });
@@ -246,7 +252,7 @@ connection.onExecuteCommand(async (params) => {
 	connection.window.showInformationMessage(`Writer-Name-Handler won't underline '${termName}' for you anymore in this context. If you change your mind, you can delete it from .jargon.known.yml at the root of your workspace.`);
 });
 
-connection.languages.semanticTokens.on(({textDocument}: SemanticTokensParams): SemanticTokens => {
+connection.languages.semanticTokens.on(({ textDocument }: SemanticTokensParams): SemanticTokens => {
 	const doc = documents.get(textDocument.uri);
 	if (!doc) {
 		return { data: [] };
@@ -266,14 +272,9 @@ function compileGlossaryFromWorkspaceFolders(workspaceFolders: WorkspaceFolder[]
 		connection.console.log(`Processing folder ${folder.name}: ${folder.uri}`);
 		const uri = URI.parse(folder.uri);
 		const path = uri.fsPath || uri.path;
-		glob('**/names.y?(a)ml', { cwd: path }, (err, matches) => {
-			if (err) {
-				connection.console.warn(err.message);
-				return;
-			}
-			matches.forEach(match => {
-				glossary.loadFile(URI.file(resolve(path, match)).toString());
-			});
+		const files = globSync('**/names.y?(a)ml', { cwd: path });
+		files.forEach((match: string): void => {
+			glossary.loadFile(URI.file(resolve(path, match)).toString());
 		});
 	});
 }
