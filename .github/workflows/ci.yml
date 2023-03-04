@@ -140,13 +140,13 @@ jobs:
       - uses: actions/download-artifact@v3
 
       - name: Publish to Visual Studio Marketplace (pre-release)
-        run: npx vsce publish --pre-release --no-git-tag-version --packagePath $(find . -iname *.vsix)
+        run: npx vsce publish --pre-release --no-git-tag-version --packagePath $(find . -iname *.vsix) -p $VSCE_PAT
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Visual Studio Marketplace (public)
-        run: npx vsce publish --no-git-tag-version --no-git-tag-version --packagePath $(find . -iname *.vsix)
+        run: npx vsce publish --no-git-tag-version --no-git-tag-version --packagePath $(find . -iname *.vsix)  -p $VSCE_PAT
         if: github.event_name != 'scheduled' && (github.event_name == 'push' && github.ref == 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
