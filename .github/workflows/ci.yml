@@ -91,7 +91,7 @@ jobs:
         run: echo "semver=${{ steps.semver_check.outputs.new_release_major_version }}.${{ steps.semver_check.outputs.new_release_minor_version }}.${{ steps.semver_check.outputs.new_release_patch_version }}" >$GITHUB_OUTPUT
     
       - name: set target paramter for non-universal target
-        if: matrix.target != "universal"
+        if: matrix.target != 'universal'
         run: echo "VSCE_TARGET_PARAM=--target=${{ matrix.target }}" >>$GITHUB_ENV
     
       - name: Build Package (non prod)
