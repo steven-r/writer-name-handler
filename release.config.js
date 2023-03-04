@@ -1,13 +1,13 @@
-// from https://github.com/vscode-shellcheck/vscode-shellcheck
 module.exports = {
-	branches: [
+  branches: [
 		"main",
 		{
 			"name": "next",
-			"prerelease": true
+			"prerelease": true,
+      "channel": "next"
 		}
 	],
-	plugins: [
+  plugins: [
 		[
 			"@semantic-release/commit-analyzer",
 			{
@@ -63,6 +63,13 @@ module.exports = {
 			},
 		],
 		"@semantic-release/changelog",
-	],
-	preset: "conventionalcommits",
+    "@semantic-release/git",
+    [
+      "@semantic-release/github",
+      {
+        assets: "*/*.vsix",
+        addReleases: "bottom",
+      },
+    ],
+  ],
 };

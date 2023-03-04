@@ -1,5 +1,4 @@
-# copied and adapted from https://github.com/vscode-shellcheck/vscode-shellcheck
-name: ci
+name: Publish
 
 on:
   push:
@@ -17,7 +16,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         vscode-version: [stable]
-
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -36,22 +34,31 @@ jobs:
           VSCODE_TEST_VERSION: ${{ matrix.vscode-version }}
         with:
           run: npm test
+          options: "-screen 0 1600x1200x24"
 
   build:
+    outputs:
+      is_new: ${{ steps.semver_check.outputs.new_release_published }}
+      channel: ${{ steps.semver_check.outputs.new_release_channel }}
+      semver: ${{ steps.semver_check.outputs.new_release_version }}
+      shortver: ${{ steps.shortversion.outputs.semver }}
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            target: universal
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
+          - target: universal
+    
+    runs-on: ubuntu-latest
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.6.0
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node version
+        uses: actions/setup-node@v1
         with:
           node-version: lts/*
 
@@ -60,22 +67,40 @@ jobs:
         run: npm ci
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
+
       - if: matrix.target == 'universal'
         name: Install dependencies (without binaries)
         run: npm ci
 
-      # workaround for https://github.com/cycjimmy/semantic-release-action/issues/150
-      - run: cp package.release.config.js release.config.js
       - name: Action For Semantic Release
+        id: semver_check
         uses: cycjimmy/semantic-release-action@v3.2.0
-        #with:
-        #  extends: "./package.release.config.js"
+        with:
+          dry_run: true
         env:
-          VSCE_TARGET: ${{ matrix.target }}
           GH_TOKEEN: ${{ secrets.SEMVER_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.SEMVER_TOKEN }}
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-          # OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: crate changelog
+        run: |
+          cat >CHANGELOG.md <<EOF
+          ${{ steps.semver_check.outputs.new_release_changelog }}
+          EOF
+
+      - name: set short version of (${{ needs.build.outputs.semver }})
+        id: shortversion
+        run: echo "semver=${{ steps.semver_check.outputs.new_release_major }}.${{ steps.semver_check.outputs.new_release_minor }}.${{ steps.semver_check.outputs.new_release_patch }}" >$GITHUB_OUTPUT
+    
+      - name: Build Package (non prod)
+        run: vsce package --pre-release --no-git-tag-version --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver }}
+        env:
+          NODE_ENV: development
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+
+      - name: Build Package (prod)
+        run: vsce package --no-git-tag-version  --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver}}
+        env:
+          NODE_ENV: production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
       - uses: actions/upload-artifact@v3
         with:
@@ -83,36 +108,59 @@ jobs:
           path: "*.vsix"
 
   release:
-    if: github.event_name != 'schedule'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: universal
 
-    needs: [test, build]
-
+    needs: [build, test]
+    if: needs.build.outputs.is_new == 'true'
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Clone Repository
+        uses: actions/checkout@v2
         with:
-          persist-credentials: false
+          fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.6.0
+      - name: Setup Node version
+        uses: actions/setup-node@v1
         with:
           node-version: lts/*
 
-      - run: npm ci
+      - run: actions/download-artifact@v3
 
-      - uses: actions/download-artifact@v3
-
-      # workaround for https://github.com/cycjimmy/semantic-release-action/issues/150
-      - run: cp publish.release.config.js release.config.js
-        if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
-      - name: Action For Semantic Release
-        uses: cycjimmy/semantic-release-action@v3.2.0
-        # Only run on push events or pull requests coming from the same repository, except from dependabot
-        if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
-        #with:
-        #  extends: "./publish.release.config.js"
+      - name: Publish to Visual Studio Marketplace (Edge)
+        run: vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}.vsix" --pre-release --no-git-tag-version 
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
         env:
-          GITHUB_TOKEN: ${{ secrets.SEMVER_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-          # OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Publish to Visual Studio Marketplace (Stable)
+        run: vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}" --no-git-tag-version --no-update-package-json 
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Publish to Open VSX Registry (Edge)
+        uses: HaaLeo/publish-vscode-extension@v1
+        if: false && github.event_name != 'push' || github.ref != 'refs/heads/main'
+        with:
+          preRelease: true
+          pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          extensionFile: ./marquee-${{ env.RELEASE_VERSION }}.vsix
+
+      - name: Publish to Open VSX Registry (Stable)
+        uses: HaaLeo/publish-vscode-extension@v1
+        if: false && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          preRelease: false
+          pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          extensionFile: ./marquee-${{ env.RELEASE_VERSION }}.vsix
+
+      - name: Action For Semantic Release
+        id: semver_check
+        uses: cycjimmy/semantic-release-action@v3.2.0
+        env:
+          GH_TOKEEN: ${{ secrets.SEMVER_TOKEN }}

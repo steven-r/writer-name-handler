@@ -6,3 +6,4 @@ client/server
 client/testFixture/.vscode/settings.json
 tsconfig.tsbuildinfo
 .DS_Store
+tmp/
