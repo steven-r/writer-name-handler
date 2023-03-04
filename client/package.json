@@ -10,7 +10,7 @@
 		"url": "https://github.com/stephen-r/writer-name-handler.git"
 	},
 	"engines": {
-		"vscode": "^1.75.1"
+		"vscode": "^1.63.0"
 	},
 	"dependencies": {
 		"vscode-languageclient": "^8.1.0"
