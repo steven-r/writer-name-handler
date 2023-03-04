@@ -83,7 +83,7 @@ jobs:
       - name: crate changelog
         run: |
           cat >CHANGELOG.md <<EOF
-          ${{ steps.semver_check.outputs.new_release_changelog }}
+          ${{ steps.semver_check.outputs.new_release_notes }}
           EOF
 
       - name: set short version of (${{ needs.build.outputs.semver }})
@@ -91,15 +91,17 @@ jobs:
         run: echo "semver=${{ steps.semver_check.outputs.new_release_major }}.${{ steps.semver_check.outputs.new_release_minor }}.${{ steps.semver_check.outputs.new_release_patch }}" >$GITHUB_OUTPUT
     
       - name: Build Package (non prod)
-        run: vsce package --pre-release --no-git-tag-version --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver }}
+        run: npx vsce package --pre-release --no-git-tag-version --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: development
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
 
       - name: Build Package (prod)
-        run: vsce package --no-git-tag-version  --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver}}
+        run: npx vsce package --no-git-tag-version  --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver}}
         env:
           NODE_ENV: production
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
       - uses: actions/upload-artifact@v3
@@ -132,13 +134,13 @@ jobs:
       - run: actions/download-artifact@v3
 
       - name: Publish to Visual Studio Marketplace (Edge)
-        run: vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}.vsix" --pre-release --no-git-tag-version 
+        run: npx vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}.vsix" --pre-release --no-git-tag-version 
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Visual Studio Marketplace (Stable)
-        run: vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}" --no-git-tag-version --no-update-package-json 
+        run: npx vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}" --no-git-tag-version --no-update-package-json 
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
