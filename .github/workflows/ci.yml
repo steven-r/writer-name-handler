@@ -131,7 +131,7 @@ jobs:
         with:
           node-version: lts/*
 
-      - run: actions/download-artifact@v3
+      - uses: actions/download-artifact@v3
 
       - name: Publish to Visual Studio Marketplace (Edge)
         run: npx vsce publish --packagePath "./writer-name-handler-${{ needs.build.outputs.shortver }}.vsix" --pre-release --no-git-tag-version 
