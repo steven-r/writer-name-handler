@@ -95,14 +95,14 @@ jobs:
         run: echo "VSCE_TARGET_PARAM=--target=${{ matrix.target }}" >>$GITHUB_ENV
     
       - name: Build Package (non prod)
-        run: npx vsce package --pre-release --no-git-tag-version $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
+        run: npx vsce package --pre-release $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: development
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
 
       - name: Build Package (prod)
-        run: npx vsce package --no-git-tag-version $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver}}
+        run: npx vsce package $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver}}
         env:
           NODE_ENV: production
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
@@ -121,7 +121,7 @@ jobs:
           - target: universal
 
     needs: [build, test]
-    if: needs.build.outputs.is_new == 'true'
+    if: success() && needs.build.outputs.is_new == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -136,18 +136,17 @@ jobs:
           node-version: lts/*
 
       - run: npm ci
-      - run: npm i -g @vscode/vsce
 
       - uses: actions/download-artifact@v3
 
       - name: Publish to Visual Studio Marketplace (pre-release)
-        run: vsce publish --packagePath "./writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix" --pre-release --no-git-tag-version 
+        run: npx vsce publish --packagePath "./writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix" --pre-release --no-git-tag-version 
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Visual Studio Marketplace (public)
-        run: vsce publish --packagePath "./writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix" --no-git-tag-version 
+        run: npx vsce publish --no-git-tag-version  --packagePath "./writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix" 
         if: github.event_name != 'scheduled' && (github.event_name == 'push' && github.ref == 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
