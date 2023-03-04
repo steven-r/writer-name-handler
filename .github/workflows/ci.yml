@@ -55,7 +55,7 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node version
         uses: actions/setup-node@v3.6.0
@@ -78,7 +78,7 @@ jobs:
         with:
           dry_run: true
         env:
-          GH_TOKEEN: ${{ secrets.SEMVER_TOKEN }}
+          GH_TOKEEN: ${{ secrets.MY_TOKEN }}
 
       - name: crate changelog
         run: |
@@ -122,7 +122,7 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node version
         uses: actions/setup-node@v3.6.0
@@ -163,4 +163,4 @@ jobs:
         id: semver_check
         uses: cycjimmy/semantic-release-action@v3.2.0
         env:
-          GH_TOKEEN: ${{ secrets.SEMVER_TOKEN }}
+          GH_TOKEEN: ${{ secrets.MY_TOKEN }}
