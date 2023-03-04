@@ -139,22 +139,15 @@ jobs:
 
       - uses: actions/download-artifact@v3
 
-      - uses: lannonbr/vsce-action@3.0.0
+      - name: Publish to Visual Studio Marketplace (pre-release)
+        run: npx vsce publish --pre-release --no-git-tag-version --packagePath $(find . -iname *.vsix) 
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
-        with:
-          args: "publish --no-git-tag-version --packpagePath writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix"
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_PAT }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-  
-      - name: Publish to Visual Studio Marketplace (pre-release)
-        run: npx vsce publish --pre-release --no-git-tag-version --packagePath $(find . -iname *.vsix) -p $VSCE_PAT
-        if: false && github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Visual Studio Marketplace (public)
-        run: npx vsce publish --no-git-tag-version --no-git-tag-version --packagePath $(find . -iname *.vsix)  -p $VSCE_PAT
+        run: npx vsce publish --no-git-tag-version --no-git-tag-version --packagePath $(find . -iname *.vsix)
         if: github.event_name != 'scheduled' && (github.event_name == 'push' && github.ref == 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
