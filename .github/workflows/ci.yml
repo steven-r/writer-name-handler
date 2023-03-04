@@ -135,6 +135,8 @@ jobs:
         with:
           node-version: lts/*
 
+      - run: npm ci
+
       - uses: actions/download-artifact@v3
 
       - name: Publish to Visual Studio Marketplace (Edge)
