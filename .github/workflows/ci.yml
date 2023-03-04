@@ -142,7 +142,7 @@ jobs:
       - uses: lannonbr/vsce-action@3.0.0
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         with:
-          args: "publish --no-git-tag-version --packpage-path writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix"
+          args: "publish --no-git-tag-version --packpagePath writer-name-helper-${{ matrix.target }}-${{ needs.build.outputs.shortver }}.vsix"
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_PAT }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
