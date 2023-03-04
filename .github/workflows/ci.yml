@@ -1,4 +1,4 @@
-name: Publish
+name: CI/CD
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.6.0
 
       - name: Setup Node
         uses: actions/setup-node@v3.6.0
@@ -53,7 +53,7 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.6.0
         with:
           fetch-depth: 0
 
@@ -120,12 +120,12 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.6.0
         with:
           fetch-depth: 0
 
       - name: Setup Node version
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3.6.0
         with:
           node-version: lts/*
 
