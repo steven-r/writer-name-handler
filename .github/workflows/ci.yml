@@ -95,14 +95,14 @@ jobs:
         run: echo "VSCE_TARGET_PARAM=--target=${{ matrix.target }}" >>$GITHUB_ENV
     
       - name: Build Package (non prod)
-        run: npx vsce package --pre-release $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
+        run: npx vsce package --no-git-tag-version --pre-release $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: development
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
 
       - name: Build Package (prod)
-        run: npx vsce package $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver}}
+        run: npx vsce package --no-git-tag-version $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver}}
         env:
           NODE_ENV: production
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
