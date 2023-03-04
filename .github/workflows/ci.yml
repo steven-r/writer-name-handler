@@ -78,7 +78,7 @@ jobs:
         with:
           dry_run: true
         env:
-          GH_TOKEEN: ${{ secrets.MY_TOKEN }}
+          GH_TOKEN: ${{ secrets.MY_TOKEN }}
 
       - name: crate changelog
         run: |
@@ -163,4 +163,4 @@ jobs:
         id: semver_check
         uses: cycjimmy/semantic-release-action@v3.2.0
         env:
-          GH_TOKEEN: ${{ secrets.MY_TOKEN }}
+          GH_TOKEN: ${{ secrets.MY_TOKEN }}
