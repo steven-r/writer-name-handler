@@ -86,9 +86,9 @@ jobs:
           ${{ steps.semver_check.outputs.new_release_notes }}
           EOF
 
-      - name: set short version of (${{ needs.build.outputs.semver }})
+      - name: set short version of (${{ steps.semver_check.outputs.new_release_version }})
         id: shortversion
-        run: echo "semver=${{ steps.semver_check.outputs.new_release_major }}.${{ steps.semver_check.outputs.new_release_minor }}.${{ steps.semver_check.outputs.new_release_patch }}" >$GITHUB_OUTPUT
+        run: echo "semver=${{ steps.semver_check.outputs.new_release_major_version }}.${{ steps.semver_check.outputs.new_release_minor_version }}.${{ steps.semver_check.outputs.new_release_patch_version }}" >$GITHUB_OUTPUT
     
       - name: Build Package (non prod)
         run: npx vsce package --pre-release --no-git-tag-version --target=${{ matrix.platform }} ${{ steps.shortversion.outputs.semver }}
