@@ -28,7 +28,7 @@ module.exports = function withDefaults(/**@type WebpackConfig*/extConfig) {
 		module: {
 			rules: [{
 				test: /\.ts$/,
-				exclude: /node_modules/,
+				exclude: /node_modules|test/,
 				use: [{
 					// configure TypeScript loader:
 					// * enable sources maps for end-to-end source maps
@@ -45,7 +45,7 @@ module.exports = function withDefaults(/**@type WebpackConfig*/extConfig) {
 			'vscode': 'commonjs vscode', // ignored because it doesn't exist
 		},
 		output: {
-			// all output goes into `dist`.
+			// all output goes into `out`.
 			// packaging depends on that and this must always be like it
 			filename: '[name].js',
 			path: path.join(extConfig.context ?? '', 'out'),

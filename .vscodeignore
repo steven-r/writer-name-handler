@@ -14,6 +14,9 @@ shared.webpack.config.js
 build/**
 *.zip
 *.vsix
+release.config.js
+test/names.yml
+tmp/**
 client/**
 !client/out/extension.js
 server/**

@@ -3,15 +3,14 @@
     "description": "Handle and process names in markdown documents.",
     "author": "Stephen Reindl",
     "license": "MIT",
-    "version": "0.1.2",
+    "version": "2.0.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/steven-r/writer-name-handler.git"
     },
     "publisher": "sreindl",
     "categories": [],
-    "keywords": [
-    ],
+    "keywords": [],
     "engines": {
         "vscode": "^1.63.0"
     },
@@ -38,8 +37,8 @@
         "compile:server": "tsc -b ./server/tsconfig.json",
         "watch": "tsc -b -w",
         "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
-        "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-        "clean": "rimraf client/out && rimraf server/out",
+        "postinstall": "cd client && npm ci && cd ../server && npm ci && cd ..",
+        "clean": "rimraf client/out server/out client/*.tsbuildinfo server/*.tsbuildinfo",
         "test": "npm run compile && npm run client:test && npm run server:test",
         "client:test": "cd client && npm test && cd ..",
         "server:test": "cd server && npm test && cd .."
