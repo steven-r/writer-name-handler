@@ -137,10 +137,8 @@ jobs:
 
       - run: npm ci
 
-      - run: npm install -g ztrace vsce
-
       - name: Publish to Visual Studio Marketplace (pre-release)
-        run: ztrace vsce publish --pre-release --no-dependencies --packagePath $(find . -iname *.vsix) 
+        run: npx -dd vsce publish --pre-release --no-dependencies --packagePath $(find . -iname *.vsix) 
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
