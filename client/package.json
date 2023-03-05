@@ -4,7 +4,7 @@
 	"author": "Stephen Reindl",
 	"license": "MIT",
 	"version": "1.0",
-	"publisher": "vscode",
+	"publisher": "sreindl",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/stephen-r/writer-name-handler.git"

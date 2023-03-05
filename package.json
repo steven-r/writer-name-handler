@@ -11,7 +11,6 @@
     "publisher": "sreindl",
     "categories": [],
     "keywords": [
-        "multi-root ready"
     ],
     "engines": {
         "vscode": "^1.63.0"
