@@ -133,9 +133,14 @@ jobs:
         with:
           node-version: lts/*
 
+      - uses: actions/download-artifact@v3
+
       - run: npm ci
 
-      - uses: actions/download-artifact@v3
+      - run: |
+          echo "$PATH"
+          echo $PWD
+          find . -iname *.vsix
 
       - name: Publish to Visual Studio Marketplace (pre-release)
         run: npx vsce publish --pre-release --no-git-tag-version --packagePath $(find . -iname *.vsix) 
