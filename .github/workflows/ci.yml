@@ -95,14 +95,14 @@ jobs:
         run: echo "VSCE_TARGET_PARAM=--target=${{ matrix.target }}" >>$GITHUB_ENV
     
       - name: Build Package (non prod)
-        run: npx vsce package --no-git-tag-version --pre-release $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
+        run: npx vsce package --no-dependencies --no-git-tag-version --pre-release $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: development
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
 
       - name: Build Package (prod)
-        run: npx vsce package --no-git-tag-version $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver}}
+        run: npx vsce package --no-dependencies --no-git-tag-version $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: production
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
@@ -110,7 +110,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: writer-name-helper-${{ matrix.target }}-${{ steps.shortversion.outputs.semver}}.vsix
+          name: writer-name-handler-${{ matrix.target }}-${{ steps.shortversion.outputs.semver}}.vsix
           path: "*.vsix"
 
   release:
@@ -138,13 +138,13 @@ jobs:
       - run: npm ci
 
       - name: Publish to Visual Studio Marketplace (pre-release)
-        run: npx vsce publish --pre-release --packagePath $(find . -iname *.vsix) 
+        run: npx vsce publish --pre-release --no-dependencies --packagePath $(find . -iname *.vsix) 
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Visual Studio Marketplace (public)
-        run: npx vsce publish --packagePath $(find . -iname *.vsix)
+        run: npx vsce publish --no-dependencies --packagePath $(find . -iname *.vsix)
         if: github.event_name != 'scheduled' && (github.event_name == 'push' && github.ref == 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
