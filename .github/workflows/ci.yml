@@ -127,8 +127,6 @@ jobs:
     steps:
       - name: Clone Repository
         uses: actions/checkout@v3
-        with:
-          persist-credentials: false
 
       - name: Setup Node version
         uses: actions/setup-node@v3.6.0
@@ -143,7 +141,6 @@ jobs:
         run: npx vsce publish --pre-release --no-git-tag-version --packagePath $(find . -iname *.vsix) 
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         env:
-          VSCE_TOKEN: ${{ secrets.VSCE_PAT }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Visual Studio Marketplace (public)
