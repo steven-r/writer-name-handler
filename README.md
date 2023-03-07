@@ -1,3 +1,7 @@
+[![GitHub](https://img.shields.io/github/release/steven-r/writer-name-handler.svg?style=flat-square)](https://github.com/steven-r/writer-name-handler/releases)
+[![The MIT License](https://img.shields.io/badge/license-MIT-orange.svg?style=flat-square)](http://opensource.org/licenses/MIT)
+![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/sreindl.writer-name-handler.svg?style=flat-square)
+
 # markdown name handler for Visual Studio Code
 
 This plugin handles names to be used in markdown files. The syntax is similar to the pandoc-gls plugin.
