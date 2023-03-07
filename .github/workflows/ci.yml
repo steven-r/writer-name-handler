@@ -98,14 +98,12 @@ jobs:
         run: npx vsce package --no-dependencies --no-git-tag-version --pre-release $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: development
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
 
       - name: Build Package (prod)
         run: npx vsce package --no-dependencies --no-git-tag-version $VSCE_TARGET_PARAM ${{ steps.shortversion.outputs.semver }}
         env:
           NODE_ENV: production
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
       - uses: actions/upload-artifact@v3
