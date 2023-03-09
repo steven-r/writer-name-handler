@@ -135,8 +135,15 @@ jobs:
 
       - run: npm ci
 
+      - run: |
+          echo **DEBUG**
+          echo vsix-file: ./writer-name-handler-universal-${{ needs.build.outputs.shortver }}
+          ls -l ./writer-name-handler-universal-${{ needs.build.outputs.shortver }} 
+          file ./writer-name-handler-universal-${{ needs.build.outputs.shortver }} 
+          echo **DEBUG**
+
       - name: Publish to Visual Studio Marketplace (pre-release)
-        run: npx vsce publish --pre-release --no-dependencies --packagePath $(find . -iname *.vsix) 
+        run: npx vsce publish --pre-release --no-dependencies --packagePath ./writer-name-handler-universal-${{ needs.build.outputs.shortver }} 
         if: github.event_name != 'scheduled' && (github.event_name != 'push' || github.ref != 'refs/heads/main')
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
