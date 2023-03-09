@@ -138,6 +138,7 @@ jobs:
       - run: |
           echo **DEBUG**
           echo vsix-file: vsix-files/writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
+          find . -iname \*.vsix
           ls -l vsix-files/writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
           file vsix-files/writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
           echo **DEBUG**
