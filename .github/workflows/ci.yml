@@ -108,7 +108,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: writer-name-handler-${{ matrix.target }}-${{ steps.shortversion.outputs.semver}}.vsix
+          name: vsix-files
           path: "*.vsix"
 
   release:
@@ -137,9 +137,9 @@ jobs:
 
       - run: |
           echo **DEBUG**
-          echo vsix-file: ./writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
-          ls -l ./writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
-          file ./writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
+          echo vsix-file: vsix-files/writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
+          ls -l vsix-files/writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
+          file vsix-files/writer-name-handler-universal-${{ needs.build.outputs.shortver }}.vsix
           echo **DEBUG**
 
       - name: Publish to Visual Studio Marketplace (pre-release)
