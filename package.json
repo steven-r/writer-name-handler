@@ -57,7 +57,7 @@
         "merge-options": "^3.0.4",
         "mocha": "^10.2.0",
         "path": "^0.12.7",
-        "rimraf": "^4.3.1",
+        "rimraf": "^4.4.0",
         "semantic-release": "^20.1.1",
         "semantic-release-stop-before-publish": "^1.0.0",
         "semantic-release-vsce": "^5.5.6",
