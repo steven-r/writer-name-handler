@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"file-uri-to-path": "^2.0.0",
-		"glob": "^9.2.1",
+		"glob": "^9.3.0",
 		"path": "^0.12.7",
 		"vscode-languageserver": "^8.1.0",
 		"vscode-languageserver-textdocument": "^1.0.8",
