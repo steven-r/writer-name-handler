@@ -35,7 +35,7 @@ import {
 } from 'vscode-languageserver-textdocument';
 
 import { Glossary, Term } from './Glossary';
-import { glob, globSync } from 'glob';
+import { globSync } from 'glob';
 import { URI } from 'vscode-uri';
 import { resolve } from 'path';
 import { RetrieveNamesRequest, RetrieveNamesResponse } from './protocolExtension';
@@ -57,7 +57,6 @@ const glossary = new Glossary(connection);
 
 
 connection.onInitialize((params: InitializeParams) => {
-	connection.console.log("Hello from server");
 	if (params.workspaceFolders) {
 		compileGlossaryFromWorkspaceFolders(params.workspaceFolders);
 	}
@@ -160,7 +159,6 @@ connection.onHover(({ textDocument, position }): Hover | undefined => {
 		const quote = m.groups['source'] || m.groups['pattern'];
 		const term = glossary.resolve(quote);
 		if (term) {
-			connection.console.log(`Found '${quote}' at position ${startChar}`);
 			const markdown = {
 				kind: MarkupKind.Markdown,
 				value: formatTerm(term, quote)
@@ -215,7 +213,6 @@ connection.onCodeAction(params => {
 
 
 connection.onDocumentHighlight(({ textDocument, position }: TextDocumentPositionParams): DocumentHighlight[] => {
-	connection.console.log(`onDocumentHighlight(position: ${position.line}/${position.character})`);
 	const doc = documents.get(textDocument.uri);
 	if (!doc) {
 		return [];
