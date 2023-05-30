@@ -25,7 +25,7 @@
 	},
 	"devDependencies": {
 		"@types/mocha": "^10.0.1",
-		"@types/vscode": "^1.76.0",
+		"@types/vscode": "^1.78.1",
 		"mocha": "^10.2.0"
 	}
 }
