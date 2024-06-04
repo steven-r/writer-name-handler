@@ -16,7 +16,7 @@
 		"glob": "^10.2.7",
 		"path": "^0.12.7",
 		"vscode-languageserver": "^8.1.0",
-		"vscode-languageserver-textdocument": "^1.0.8",
+		"vscode-languageserver-textdocument": "^1.0.11",
 		"vscode-uri": "^3.0.7",
 		"yaml": "^2.3.1"
 	},
