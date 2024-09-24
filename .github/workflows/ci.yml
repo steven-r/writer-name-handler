@@ -67,7 +67,7 @@ jobs:
       # workaround for https://github.com/cycjimmy/semantic-release-action/issues/150
       - run: cp package.release.config.js release.config.js
       - name: Action For Semantic Release
-        uses: cycjimmy/semantic-release-action@v3.2.0
+        uses: cycjimmy/semantic-release-action@v4.1.0
         #with:
         #  extends: "./package.release.config.js"
         env:
@@ -107,7 +107,7 @@ jobs:
       - run: cp publish.release.config.js release.config.js
         if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
       - name: Action For Semantic Release
-        uses: cycjimmy/semantic-release-action@v3.2.0
+        uses: cycjimmy/semantic-release-action@v4.1.0
         # Only run on push events or pull requests coming from the same repository, except from dependabot
         if: github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
         #with:
