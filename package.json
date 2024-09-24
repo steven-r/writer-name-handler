@@ -52,7 +52,7 @@
         "@typescript-eslint/eslint-plugin": "^8.0.0",
         "@typescript-eslint/parser": "^8.0.0",
         "conventional-changelog-conventionalcommits": "^8.0.0",
-        "eslint": "^8.36.0",
+        "eslint": "^9.0.0",
         "fs": "^0.0.1-security",
         "merge-options": "^3.0.4",
         "mocha": "^10.4.0",
