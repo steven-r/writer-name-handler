@@ -24,7 +24,7 @@
 		"test": "mocha ./out/test"
 	},
 	"devDependencies": {
-		"@types/mocha": "^10.0.6",
+		"@types/mocha": "^10.0.9",
 		"@types/vscode": "^1.79.0",
 		"mocha": "^10.4.0"
 	}
